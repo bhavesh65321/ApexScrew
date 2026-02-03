@@ -1,0 +1,14 @@
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './styles/globals.css'
+import { initAnalytics } from './utils/analytics'
+
+// Initialize analytics (Google Analytics + Microsoft Clarity)
+initAnalytics()
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)

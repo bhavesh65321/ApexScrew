@@ -1,0 +1,114 @@
+{
+  "categories": [
+    {
+      "id": "screws",
+      "name": "Screws",
+      "icon": "Wrench",
+      "description": "High-quality screws for all industrial applications",
+      "subcategories": ["Hex Head", "Phillips Head", "Self-Tapping", "Machine Screws", "Wood Screws", "Sheet Metal Screws"]
+    },
+    {
+      "id": "bolts",
+      "name": "Bolts",
+      "icon": "CircleDot",
+      "description": "Industrial-grade bolts for heavy-duty applications",
+      "subcategories": ["Hex Bolts", "Carriage Bolts", "U-Bolts", "Eye Bolts", "Anchor Bolts", "Flange Bolts"]
+    },
+    {
+      "id": "nuts",
+      "name": "Nuts",
+      "icon": "Hexagon",
+      "description": "Precision nuts for secure fastening",
+      "subcategories": ["Hex Nuts", "Lock Nuts", "Wing Nuts", "Cap Nuts", "Flange Nuts", "Coupling Nuts"]
+    },
+    {
+      "id": "custom",
+      "name": "Custom Fasteners",
+      "icon": "Settings",
+      "description": "Tailored fastening solutions for your specific needs",
+      "subcategories": ["Special Bolts", "Custom Screws", "Specialty Nuts", "Threaded Rods", "Washers", "Rivets"]
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "name": "Hex Head Bolt M8x50",
+      "category": "bolts",
+      "subcategory": "Hex Bolts",
+      "material": "Stainless Steel 304",
+      "sizeRange": "M6 - M24",
+      "description": "High-strength hex head bolts suitable for industrial machinery and construction.",
+      "image": "/images/products/hex-bolt.jpg"
+    },
+    {
+      "id": "2",
+      "name": "Phillips Head Screw",
+      "category": "screws",
+      "subcategory": "Phillips Head",
+      "material": "Carbon Steel, Zinc Plated",
+      "sizeRange": "M3 - M10",
+      "description": "Precision phillips head screws for general purpose applications.",
+      "image": "/images/products/phillips-screw.jpg"
+    },
+    {
+      "id": "3",
+      "name": "Hex Nut Grade 8",
+      "category": "nuts",
+      "subcategory": "Hex Nuts",
+      "material": "Alloy Steel",
+      "sizeRange": "M6 - M36",
+      "description": "Heavy-duty hex nuts for high-stress applications.",
+      "image": "/images/products/hex-nut.jpg"
+    },
+    {
+      "id": "4",
+      "name": "Self-Tapping Screw",
+      "category": "screws",
+      "subcategory": "Self-Tapping",
+      "material": "Stainless Steel 410",
+      "sizeRange": "M4 - M12",
+      "description": "Self-drilling screws for sheet metal and thin materials.",
+      "image": "/images/products/self-tapping.jpg"
+    },
+    {
+      "id": "5",
+      "name": "U-Bolt Heavy Duty",
+      "category": "bolts",
+      "subcategory": "U-Bolts",
+      "material": "Hot Dip Galvanized",
+      "sizeRange": "1/2\" - 2\"",
+      "description": "Industrial U-bolts for pipe and conduit mounting.",
+      "image": "/images/products/u-bolt.jpg"
+    },
+    {
+      "id": "6",
+      "name": "Lock Nut Nylon Insert",
+      "category": "nuts",
+      "subcategory": "Lock Nuts",
+      "material": "Steel with Nylon Insert",
+      "sizeRange": "M4 - M20",
+      "description": "Vibration-resistant lock nuts with nylon insert.",
+      "image": "/images/products/lock-nut.jpg"
+    },
+    {
+      "id": "7",
+      "name": "Anchor Bolt Foundation",
+      "category": "bolts",
+      "subcategory": "Anchor Bolts",
+      "material": "Carbon Steel Grade 4.6",
+      "sizeRange": "M12 - M48",
+      "description": "Foundation anchor bolts for structural applications.",
+      "image": "/images/products/anchor-bolt.jpg"
+    },
+    {
+      "id": "8",
+      "name": "Threaded Rod",
+      "category": "custom",
+      "subcategory": "Threaded Rods",
+      "material": "Stainless Steel / Mild Steel",
+      "sizeRange": "M6 - M36, 1m - 3m length",
+      "description": "Full-thread rods for custom fastening solutions.",
+      "image": "/images/products/threaded-rod.jpg"
+    }
+  ]
+}
