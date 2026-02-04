@@ -46,22 +46,18 @@ const Footer = () => {
       </div>
 
       {/* Main Footer */}
-      <div className="container-custom py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Company Info */}
-          <div>
-            <Link to="/" className="flex items-center gap-3 mb-6">
-              <svg width="40" height="40" viewBox="0 0 100 100">
-                <path d="M50 5 L80 25 L65 25 L50 15 L35 25 L20 25 Z" fill="#E5A027"/>
-                <path d="M50 20 L70 35 L60 35 L50 28 L40 35 L30 35 Z" fill="#E5A027"/>
-                <path d="M25 40 C25 40 25 70 50 85 C75 70 75 40 75 40 L50 55 Z" fill="#1B6B7C"/>
-              </svg>
-              <span className="text-xl font-heading font-bold">
-                <span className="text-brand-orange">Apex</span>
-                <span className="text-white"> ScrewBolta</span>
-              </span>
+      <div className="container-custom py-10 md:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10">
+          {/* Company Info - Full width on mobile */}
+          <div className="col-span-2 lg:col-span-1">
+            <Link to="/" className="inline-block mb-4 md:mb-6">
+              <img 
+                src="/logo.png" 
+                alt="Apex ScrewBolta" 
+                className="h-12 md:h-16 w-auto"
+              />
             </Link>
-            <p className="text-slate-400 mb-6 text-sm leading-relaxed">
+            <p className="text-slate-400 mb-4 md:mb-6 text-sm leading-relaxed">
               "{companyInfo.tagline}" - Your trusted partner for premium industrial fasteners.
             </p>
             <div className="flex gap-3">
@@ -69,27 +65,27 @@ const Footer = () => {
                 <a 
                   key={idx}
                   href="#" 
-                  className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center hover:bg-brand-teal transition-colors text-slate-400 hover:text-white"
+                  className="w-9 h-9 md:w-10 md:h-10 bg-slate-800 rounded-lg flex items-center justify-center hover:bg-brand-teal transition-colors text-slate-400 hover:text-white"
                 >
-                  <Icon size={18} />
+                  <Icon size={16} className="md:w-[18px] md:h-[18px]" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links - Same row as Products on mobile */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
+            <h4 className="text-xs md:text-sm font-semibold text-white uppercase tracking-wider mb-4 md:mb-6">
               Quick Links
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2 md:space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.name}>
                   <Link 
                     to={link.href} 
-                    className="text-slate-400 hover:text-brand-orange transition-colors text-sm flex items-center gap-2"
+                    className="text-slate-400 hover:text-brand-orange transition-colors text-xs md:text-sm flex items-center gap-1.5 md:gap-2"
                   >
-                    <ArrowRight size={14} />
+                    <ArrowRight size={12} className="md:w-3.5 md:h-3.5" />
                     {link.name}
                   </Link>
                 </li>
@@ -97,19 +93,19 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Products */}
+          {/* Products - Same row as Quick Links on mobile */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
+            <h4 className="text-xs md:text-sm font-semibold text-white uppercase tracking-wider mb-4 md:mb-6">
               Products
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2 md:space-y-3">
               {productLinks.map((link) => (
                 <li key={link.name}>
                   <Link 
                     to={link.href} 
-                    className="text-slate-400 hover:text-brand-orange transition-colors text-sm flex items-center gap-2"
+                    className="text-slate-400 hover:text-brand-orange transition-colors text-xs md:text-sm flex items-center gap-1.5 md:gap-2"
                   >
-                    <ArrowRight size={14} />
+                    <ArrowRight size={12} className="md:w-3.5 md:h-3.5" />
                     {link.name}
                   </Link>
                 </li>
@@ -117,20 +113,20 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact Info */}
-          <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
+          {/* Contact Info - Full width on mobile */}
+          <div className="col-span-2 lg:col-span-1">
+            <h4 className="text-xs md:text-sm font-semibold text-white uppercase tracking-wider mb-4 md:mb-6">
               Contact
             </h4>
-            <ul className="space-y-4">
+            <ul className="space-y-3 md:space-y-4">
               <li className="flex items-start gap-3">
-                <MapPin size={18} className="text-brand-orange mt-0.5 flex-shrink-0" />
-                <span className="text-slate-400 text-sm leading-relaxed">{companyInfo.address.full}</span>
+                <MapPin size={16} className="text-brand-orange mt-0.5 flex-shrink-0 md:w-[18px] md:h-[18px]" />
+                <span className="text-slate-400 text-xs md:text-sm leading-relaxed">{companyInfo.address.full}</span>
               </li>
               <li>
                 <a href={getCallUrl()} className="flex items-start gap-3 text-slate-400 hover:text-white transition-colors">
-                  <Phone size={18} className="text-brand-orange flex-shrink-0" />
-                  <div className="text-sm">
+                  <Phone size={16} className="text-brand-orange flex-shrink-0 md:w-[18px] md:h-[18px]" />
+                  <div className="text-xs md:text-sm">
                     <div>{companyInfo.contact.phone}</div>
                     <div>{companyInfo.contact.phone2}</div>
                   </div>
@@ -138,13 +134,13 @@ const Footer = () => {
               </li>
               <li>
                 <a href={`mailto:${companyInfo.contact.email}`} className="flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
-                  <Mail size={18} className="text-brand-orange flex-shrink-0" />
-                  <span className="text-sm">{companyInfo.contact.email}</span>
+                  <Mail size={16} className="text-brand-orange flex-shrink-0 md:w-[18px] md:h-[18px]" />
+                  <span className="text-xs md:text-sm">{companyInfo.contact.email}</span>
                 </a>
               </li>
               <li className="flex items-start gap-3">
-                <Clock size={18} className="text-brand-orange mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-slate-400">
+                <Clock size={16} className="text-brand-orange mt-0.5 flex-shrink-0 md:w-[18px] md:h-[18px]" />
+                <div className="text-xs md:text-sm text-slate-400">
                   <p>Mon-Fri: {companyInfo.businessHours.weekdays}</p>
                   <p>Sat: {companyInfo.businessHours.saturday}</p>
                 </div>

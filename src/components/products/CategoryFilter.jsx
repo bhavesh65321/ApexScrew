@@ -1,20 +1,23 @@
 import { Package } from 'lucide-react';
-import productsData from '../../data/products.json';
 
 const categoryIcons = {
   screws: '🔩',
   bolts: '⚙️',
   nuts: '🔧',
   custom: '⚡',
+  washers: '⭕',
+  rivets: '📍',
+  anchors: '⚓',
+  studs: '📌',
 };
 
 const CategoryFilter = ({ 
   selectedCategory, 
   onCategoryChange,
   selectedSubcategory,
-  onSubcategoryChange 
+  onSubcategoryChange,
+  categories = []
 }) => {
-  const { categories } = productsData;
   const currentCategory = categories.find(c => c.id === selectedCategory);
 
   return (

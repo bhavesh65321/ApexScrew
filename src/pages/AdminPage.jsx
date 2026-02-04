@@ -4,13 +4,30 @@ import {
   Lock, LogOut, Users, FileText, Phone, Mail, Calendar,
   TrendingUp, Clock, CheckCircle, XCircle, MessageCircle,
   Eye, Trash2, ExternalLink, Monitor, Smartphone, Globe,
-  BarChart3, MousePointer, Sheet
+  BarChart3, MousePointer, Sheet, Package, Plus, X, Save
 } from 'lucide-react';
 import { verifyPassword, createSession, isSessionValid, clearSession } from '../utils/auth';
 import { getEnquiries, getEnquiryStats, updateEnquiryStatus, deleteEnquiry } from '../utils/enquiryStorage';
 import { getVisitorStats, getStoredVisits } from '../services/visitorTracking';
 import { isGoogleSheetsConfigured } from '../services/googleSheetsSubmit';
+import { 
+  getCustomProducts, addProduct, deleteProduct, 
+  getAllCategories, getProductStats 
+} from '../utils/productStorage';
+import productsData from '../data/products.json';
 import { companyInfo } from '../data/companyInfo';
+
+// Convert Google Drive links to displayable image URLs
+const getProductImageUrl = (url) => {
+  if (!url) return null;
+  if (!url.includes('drive.google.com')) return url;
+  
+  const fileMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  const openMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  const fileId = fileMatch?.[1] || openMatch?.[1];
+  
+  return fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w200` : url;
+};
 
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -20,9 +37,24 @@ const AdminPage = () => {
   const [enquiries, setEnquiries] = useState([]);
   const [stats, setStats] = useState(null);
   const [visitorStats, setVisitorStats] = useState(null);
-  const [activeTab, setActiveTab] = useState('enquiries'); // 'enquiries' or 'visitors'
+  const [activeTab, setActiveTab] = useState('enquiries'); // 'enquiries', 'visitors', 'products'
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const [sheetsConfigured, setSheetsConfigured] = useState(false);
+  
+  // Product management state
+  const [customProducts, setCustomProducts] = useState([]);
+  const [productStats, setProductStats] = useState(null);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    category: '',
+    subcategory: '',
+    material: '',
+    sizeRange: '',
+    description: '',
+    image: '',
+  });
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,7 +71,12 @@ const AdminPage = () => {
     setEnquiries(getEnquiries());
     setStats(getEnquiryStats());
     setVisitorStats(getVisitorStats());
+    setCustomProducts(getCustomProducts());
+    setProductStats(getProductStats());
   };
+  
+  // Get all categories (static + custom)
+  const allCategories = getAllCategories(productsData.categories);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -77,6 +114,35 @@ const AdminPage = () => {
       deleteEnquiry(id);
       loadData();
       setSelectedEnquiry(null);
+    }
+  };
+  
+  // Product management handlers
+  const handleAddProduct = (e) => {
+    e.preventDefault();
+    if (!newProduct.name || !newProduct.category) {
+      alert('Please enter product name and category');
+      return;
+    }
+    
+    addProduct(newProduct);
+    setNewProduct({
+      name: '',
+      category: '',
+      subcategory: '',
+      material: '',
+      sizeRange: '',
+      description: '',
+      image: '',
+    });
+    setShowAddProduct(false);
+    loadData();
+  };
+  
+  const handleDeleteProduct = (id) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      deleteProduct(id);
+      loadData();
     }
   };
 
@@ -351,7 +417,7 @@ const AdminPage = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-4">
           <button
             onClick={() => setActiveTab('enquiries')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -372,7 +438,18 @@ const AdminPage = () => {
             }`}
           >
             <Users size={16} className="inline mr-2" />
-            Recent Visitors ({visitorStats?.totalVisits || 0})
+            Visitors ({visitorStats?.totalVisits || 0})
+          </button>
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'products'
+                ? 'bg-brand-orange text-white'
+                : 'bg-white text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            <Package size={16} className="inline mr-2" />
+            Products ({productStats?.totalCustomProducts || 0})
           </button>
         </div>
 
@@ -549,7 +626,310 @@ const AdminPage = () => {
             )}
           </div>
         )}
+
+        {/* Products Management */}
+        {activeTab === 'products' && (
+          <div className="space-y-6">
+            {/* Add Product Button */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="font-heading font-bold text-slate-800 text-xl">Product Management</h2>
+                <p className="text-sm text-slate-500">
+                  Add custom products. New categories are created automatically.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAddProduct(true)}
+                className="btn-primary"
+              >
+                <Plus size={18} />
+                Add Product
+              </button>
+            </div>
+
+            {/* Product Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-sm text-slate-500">Custom Products</p>
+                <p className="text-2xl font-bold text-brand-orange">{productStats?.totalCustomProducts || 0}</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-sm text-slate-500">Static Products</p>
+                <p className="text-2xl font-bold text-slate-800">{productsData.products.length}</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-sm text-slate-500">Total Categories</p>
+                <p className="text-2xl font-bold text-brand-teal">{allCategories.length}</p>
+              </div>
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-sm text-slate-500">Custom Categories</p>
+                <p className="text-2xl font-bold text-purple-600">{productStats?.totalCustomCategories || 0}</p>
+              </div>
+            </div>
+
+            {/* Custom Products List */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-slate-100">
+                <h3 className="font-heading font-bold text-slate-800">Custom Products</h3>
+                <p className="text-sm text-slate-500">Products added via admin panel</p>
+              </div>
+
+              {customProducts.length === 0 ? (
+                <div className="p-12 text-center">
+                  <Package className="mx-auto text-slate-300 mb-4" size={48} />
+                  <p className="text-slate-500">No custom products added yet</p>
+                  <p className="text-sm text-slate-400 mb-4">Click "Add Product" to add your first product</p>
+                  <button
+                    onClick={() => setShowAddProduct(true)}
+                    className="btn-outline"
+                  >
+                    <Plus size={16} />
+                    Add First Product
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Product</th>
+                        <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Category</th>
+                        <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Subcategory</th>
+                        <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Material</th>
+                        <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Size Range</th>
+                        <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {customProducts.map((product) => (
+                        <tr key={product.id} className="hover:bg-slate-50">
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-3">
+                              {product.image ? (
+                                <img 
+                                  src={getProductImageUrl(product.image)} 
+                                  alt={product.name}
+                                  className="w-12 h-12 rounded-lg object-cover bg-slate-100"
+                                  onError={(e) => e.target.style.display = 'none'}
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center">
+                                  <Package size={20} className="text-slate-400" />
+                                </div>
+                              )}
+                              <div>
+                                <p className="font-medium text-slate-800">{product.name}</p>
+                                <p className="text-xs text-slate-500 truncate max-w-xs">{product.description}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-5 py-4">
+                            <span className="px-2 py-1 bg-brand-teal/10 text-brand-teal rounded-full text-xs font-medium capitalize">
+                              {product.category}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-sm text-slate-600">
+                            {product.subcategory || '-'}
+                          </td>
+                          <td className="px-5 py-4 text-sm text-slate-600">
+                            {product.material || '-'}
+                          </td>
+                          <td className="px-5 py-4 text-sm text-slate-600">
+                            {product.sizeRange || '-'}
+                          </td>
+                          <td className="px-5 py-4">
+                            <button
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
+                              title="Delete"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Existing Categories */}
+            <div className="bg-white rounded-xl shadow-sm p-5">
+              <h3 className="font-heading font-bold text-slate-800 mb-4">All Categories</h3>
+              <div className="flex flex-wrap gap-2">
+                {allCategories.map((cat) => (
+                  <div key={cat.id} className={`px-3 py-2 rounded-lg text-sm ${
+                    cat.isCustom 
+                      ? 'bg-purple-100 text-purple-700 border border-purple-200' 
+                      : 'bg-slate-100 text-slate-700'
+                  }`}>
+                    <span className="font-medium">{cat.name}</span>
+                    {cat.isCustom && <span className="ml-1 text-xs">(custom)</span>}
+                    <span className="ml-2 text-xs opacity-70">
+                      {cat.subcategories?.length || 0} types
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-slate-400 mt-3">
+                Tip: Add a product with a new category name to auto-create a new category
+              </p>
+            </div>
+          </div>
+        )}
       </main>
+
+      {/* Add Product Modal */}
+      {showAddProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="font-heading font-bold text-slate-800">Add New Product</h3>
+              <button
+                onClick={() => setShowAddProduct(false)}
+                className="p-2 hover:bg-slate-100 rounded-lg"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddProduct} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Product Name *
+                </label>
+                <input
+                  type="text"
+                  value={newProduct.name}
+                  onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                  className="input-field"
+                  placeholder="e.g., Hex Bolt M10x50"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Category *
+                  </label>
+                  <input
+                    type="text"
+                    list="categories"
+                    value={newProduct.category}
+                    onChange={(e) => setNewProduct({...newProduct, category: e.target.value.toLowerCase()})}
+                    className="input-field"
+                    placeholder="e.g., bolts or new-type"
+                    required
+                  />
+                  <datalist id="categories">
+                    {allCategories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </datalist>
+                  <p className="text-xs text-slate-400 mt-1">Type new name to create category</p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Subcategory
+                  </label>
+                  <input
+                    type="text"
+                    value={newProduct.subcategory}
+                    onChange={(e) => setNewProduct({...newProduct, subcategory: e.target.value})}
+                    className="input-field"
+                    placeholder="e.g., Hex Bolts"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Material
+                  </label>
+                  <input
+                    type="text"
+                    value={newProduct.material}
+                    onChange={(e) => setNewProduct({...newProduct, material: e.target.value})}
+                    className="input-field"
+                    placeholder="e.g., Stainless Steel 304"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Size Range
+                  </label>
+                  <input
+                    type="text"
+                    value={newProduct.sizeRange}
+                    onChange={(e) => setNewProduct({...newProduct, sizeRange: e.target.value})}
+                    className="input-field"
+                    placeholder="e.g., M6 - M24"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={newProduct.description}
+                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                  className="input-field resize-none"
+                  rows={3}
+                  placeholder="Product description..."
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Image URL (optional)
+                </label>
+                <input
+                  type="text"
+                  value={newProduct.image}
+                  onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
+                  className="input-field"
+                  placeholder="Paste Google Drive link or image URL"
+                />
+                <div className="mt-2 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-blue-800 font-medium mb-1">How to add Google Drive image:</p>
+                  <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
+                    <li>Upload image to Google Drive</li>
+                    <li>Right-click → "Share" → "Anyone with link"</li>
+                    <li>Copy the link and paste here</li>
+                  </ol>
+                  <p className="text-xs text-blue-600 mt-2">
+                    Supported: Google Drive links, direct image URLs (.jpg, .png, .webp)
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddProduct(false)}
+                  className="btn-outline flex-1 justify-center"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary flex-1 justify-center"
+                >
+                  <Save size={16} />
+                  Add Product
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Enquiry Detail Modal */}
       {selectedEnquiry && (

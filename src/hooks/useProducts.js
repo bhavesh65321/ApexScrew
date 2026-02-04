@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import useGoogleSheets from './useGoogleSheets';
 import localProducts from '../data/products.json';
+import { getAllProducts, getAllCategories, getCustomProducts } from '../utils/productStorage';
 
 /**
  * Configuration for Google Sheets integration
@@ -14,13 +15,14 @@ const GOOGLE_SHEET_CONFIG = {
 
 /**
  * Custom hook for managing products
- * Uses Google Sheets if configured, falls back to local JSON data
+ * Combines: Custom products (localStorage) + Static products (JSON) + Google Sheets (if enabled)
  */
 const useProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [source, setSource] = useState('local'); // 'local' | 'sheets'
+  const [source, setSource] = useState('local'); // 'local' | 'sheets' | 'mixed'
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Google Sheets data
   const sheetsData = useGoogleSheets(
@@ -29,33 +31,47 @@ const useProducts = () => {
     GOOGLE_SHEET_CONFIG.enabled
   );
 
-  useEffect(() => {
-    if (GOOGLE_SHEET_CONFIG.enabled) {
-      // Use Google Sheets data
-      if (!sheetsData.loading) {
-        if (sheetsData.error || sheetsData.data.length === 0) {
-          // Fall back to local data on error
-          console.log('Falling back to local product data');
-          setProducts(localProducts.products);
-          setSource('local');
-          setError(sheetsData.error);
-        } else {
-          setProducts(sheetsData.data);
-          setSource('sheets');
-          setError(null);
-        }
-        setLoading(false);
+  // Load products from all sources
+  const loadProducts = useCallback(() => {
+    const customProducts = getCustomProducts();
+    
+    if (GOOGLE_SHEET_CONFIG.enabled && !sheetsData.loading) {
+      if (sheetsData.error || sheetsData.data.length === 0) {
+        // Combine custom + local products
+        const allProducts = getAllProducts(localProducts.products);
+        setProducts(allProducts);
+        setSource(customProducts.length > 0 ? 'mixed' : 'local');
+        setError(sheetsData.error);
+      } else {
+        // Combine custom + sheets products
+        const allProducts = getAllProducts(sheetsData.data);
+        setProducts(allProducts);
+        setSource(customProducts.length > 0 ? 'mixed' : 'sheets');
+        setError(null);
       }
-    } else {
-      // Use local JSON data
-      setProducts(localProducts.products);
-      setSource('local');
-      setLoading(false);
+    } else if (!GOOGLE_SHEET_CONFIG.enabled) {
+      // Combine custom + local JSON products
+      const allProducts = getAllProducts(localProducts.products);
+      setProducts(allProducts);
+      setSource(customProducts.length > 0 ? 'mixed' : 'local');
     }
+    
+    setLoading(false);
   }, [sheetsData.loading, sheetsData.data, sheetsData.error]);
 
-  // Categories from local data (categories are defined locally)
-  const categories = useMemo(() => localProducts.categories, []);
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts, refreshKey]);
+
+  // Refresh products (call after adding/updating)
+  const refreshProducts = useCallback(() => {
+    setRefreshKey(k => k + 1);
+  }, []);
+
+  // Categories from local + custom data
+  const categories = useMemo(() => {
+    return getAllCategories(localProducts.categories);
+  }, [refreshKey]);
 
   // Filter products by category
   const getProductsByCategory = (categoryId) => {
@@ -89,6 +105,7 @@ const useProducts = () => {
     getProductsByCategory,
     getProductsBySubcategory,
     searchProducts,
+    refreshProducts,
     refetch: sheetsData.refetch,
   };
 };

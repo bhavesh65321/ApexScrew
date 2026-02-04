@@ -1,39 +1,70 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, Search } from 'lucide-react';
 import CategoryFilter from '../components/products/CategoryFilter';
 import ProductGrid from '../components/products/ProductGrid';
-import productsData from '../data/products.json';
+import useProducts from '../hooks/useProducts';
 
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category'));
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+  
+  // Get products from hook (includes static + custom products)
+  const { products: allProducts, categories, loading: productsLoading } = useProducts();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 500);
+    const timer = setTimeout(() => setLoading(productsLoading), 300);
     return () => clearTimeout(timer);
-  }, [selectedCategory, selectedSubcategory]);
+  }, [selectedCategory, selectedSubcategory, searchQuery, productsLoading]);
 
+  // Sync URL with filters
   useEffect(() => {
-    if (selectedCategory) {
-      setSearchParams({ category: selectedCategory });
-    } else {
-      setSearchParams({});
-    }
-  }, [selectedCategory, setSearchParams]);
+    const params = {};
+    if (selectedCategory) params.category = selectedCategory;
+    if (searchQuery) params.search = searchQuery;
+    setSearchParams(params);
+  }, [selectedCategory, searchQuery, setSearchParams]);
 
-  const filteredProducts = productsData.products.filter((product) => {
-    if (selectedCategory && product.category !== selectedCategory) return false;
-    if (selectedSubcategory && product.subcategory !== selectedSubcategory) return false;
-    return true;
-  });
+  // Update search when URL changes (from header search)
+  useEffect(() => {
+    const urlSearch = searchParams.get('search');
+    if (urlSearch && urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch);
+      // Clear category when searching
+      setSelectedCategory(null);
+      setSelectedSubcategory(null);
+    }
+  }, [searchParams]);
+
+  // Filter products
+  const filteredProducts = useMemo(() => {
+    return allProducts.filter((product) => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch = 
+          product.name?.toLowerCase().includes(query) ||
+          product.category?.toLowerCase().includes(query) ||
+          product.subcategory?.toLowerCase().includes(query) ||
+          product.material?.toLowerCase().includes(query) ||
+          product.description?.toLowerCase().includes(query);
+        if (!matchesSearch) return false;
+      }
+      
+      if (selectedCategory && product.category !== selectedCategory) return false;
+      if (selectedSubcategory && product.subcategory !== selectedSubcategory) return false;
+      return true;
+    });
+  }, [allProducts, searchQuery, selectedCategory, selectedSubcategory]);
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
+    setSearchQuery(''); // Clear search when changing category
     setShowMobileFilter(false);
   };
 
@@ -42,27 +73,68 @@ const ProductsPage = () => {
     setShowMobileFilter(false);
   };
 
-  const currentCategoryName = selectedCategory 
-    ? productsData.categories.find(c => c.id === selectedCategory)?.name 
-    : 'All Products';
+  const handleSearch = (e) => {
+    e.preventDefault();
+    // Search is already reactive via state
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
+
+  const currentCategoryName = searchQuery 
+    ? `Search: "${searchQuery}"`
+    : selectedCategory 
+      ? categories.find(c => c.id === selectedCategory)?.name 
+      : 'All Products';
 
   return (
     <div className="pb-20 md:pb-0 bg-white min-h-screen">
       {/* Page Header */}
-      <section className="pt-32 pb-12 md:pt-40 md:pb-16 bg-brand-teal relative overflow-hidden">
+      <section className="pt-32 pb-8 md:pt-40 md:pb-12 bg-brand-teal relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-1/4 h-16 bg-brand-orange rounded-bl-[60px]"></div>
         <div className="absolute bottom-0 left-0 w-1/4 h-16 bg-brand-orange rounded-tr-[60px]"></div>
         
         <div className="container-custom relative">
           <div className="accent-line bg-brand-orange mb-4"></div>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-4">
-            Our Products
+          <h1 className="text-3xl md:text-5xl font-heading font-bold text-white mb-4">
+            {searchQuery ? `Search Results` : 'Our Products'}
           </h1>
-          <p className="text-white/80 max-w-2xl text-lg">
-            Browse our comprehensive range of industrial fasteners. 
-            From standard screws and bolts to custom solutions.
+          <p className="text-white/80 max-w-2xl text-lg mb-6">
+            {searchQuery 
+              ? `Found ${filteredProducts.length} products for "${searchQuery}"`
+              : 'Browse our comprehensive range of industrial fasteners. From standard screws and bolts to custom solutions.'
+            }
           </p>
+          
+          {/* Search Bar in Header */}
+          <form onSubmit={handleSearch} className="max-w-xl">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products... (e.g., hex bolt, stainless steel, M10)"
+                className="w-full pl-5 pr-24 py-4 bg-white/95 backdrop-blur-sm border-0 rounded-xl text-slate-800 placeholder-slate-400 shadow-lg focus:outline-none focus:ring-4 focus:ring-brand-orange/30"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute right-14 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600"
+                >
+                  <X size={18} />
+                </button>
+              )}
+              <button 
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-brand-orange text-white rounded-lg flex items-center justify-center hover:bg-brand-orange-dark transition-colors"
+              >
+                <Search size={20} />
+              </button>
+            </div>
+          </form>
         </div>
       </section>
 
@@ -76,6 +148,7 @@ const ProductsPage = () => {
                 onCategoryChange={handleCategoryChange}
                 selectedSubcategory={selectedSubcategory}
                 onSubcategoryChange={handleSubcategoryChange}
+                categories={categories}
               />
               
               {/* Enquiry CTA */}
@@ -115,11 +188,20 @@ const ProductsPage = () => {
             </div>
 
             {/* Active Filters */}
-            {(selectedCategory || selectedSubcategory) && (
+            {(selectedCategory || selectedSubcategory || searchQuery) && (
               <div className="flex flex-wrap gap-2 mb-6">
+                {searchQuery && (
+                  <span className="inline-flex items-center gap-2 bg-brand-teal/10 text-brand-teal px-4 py-1.5 rounded-full text-sm font-medium">
+                    <Search size={14} />
+                    "{searchQuery}"
+                    <button onClick={clearSearch} className="hover:text-brand-teal-dark">
+                      <X size={14} />
+                    </button>
+                  </span>
+                )}
                 {selectedCategory && (
                   <span className="inline-flex items-center gap-2 bg-brand-orange/10 text-brand-orange px-4 py-1.5 rounded-full text-sm font-medium">
-                    {currentCategoryName}
+                    {productsData.categories.find(c => c.id === selectedCategory)?.name}
                     <button onClick={() => handleCategoryChange(null)} className="hover:text-brand-orange-dark">
                       <X size={14} />
                     </button>
@@ -195,6 +277,7 @@ const ProductsPage = () => {
                 onCategoryChange={handleCategoryChange}
                 selectedSubcategory={selectedSubcategory}
                 onSubcategoryChange={handleSubcategoryChange}
+                categories={categories}
               />
             </div>
           </div>

@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Phone, Mail, MapPin } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, Phone, Mail, MapPin, Search, MessageCircle } from 'lucide-react';
 import { companyInfo, getWhatsAppUrl, getCallUrl } from '../../data/companyInfo';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +18,22 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close search when route changes
+  useEffect(() => {
+    setIsSearchOpen(false);
+    setSearchQuery('');
+  }, [location.pathname]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
+      setSearchQuery('');
+      setIsMenuOpen(false);
+    }
+  };
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -54,28 +73,37 @@ const Header = () => {
 
       {/* Main Header */}
       <div className="container-custom">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-3 md:py-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <div className="relative">
-              {/* Logo SVG matching visiting card */}
-              <svg width="48" height="48" viewBox="0 0 100 100" className="w-12 h-12">
-                <path d="M50 5 L80 25 L65 25 L50 15 L35 25 L20 25 Z" fill="#E5A027"/>
-                <path d="M50 20 L70 35 L60 35 L50 28 L40 35 L30 35 Z" fill="#E5A027"/>
-                <path d="M25 40 C25 40 25 70 50 85 C75 70 75 40 75 40 L50 55 Z" fill="#1B6B7C"/>
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-xl md:text-2xl font-heading font-bold">
-                <span className="text-brand-orange">Apex</span>
-                <span className="text-brand-teal"> ScrewBolta</span>
-              </h1>
-              <p className="text-xs text-slate-500 hidden sm:block">Industrial Fasteners</p>
-            </div>
+          <Link to="/" className="flex items-center">
+            <img 
+              src="/logo.png" 
+              alt="Apex ScrewBolta - Industrial Fasteners" 
+              className="h-10 md:h-14 w-auto"
+            />
           </Link>
 
+          {/* Desktop Search Bar */}
+          <div className="hidden lg:flex flex-1 max-w-md mx-8">
+            <form onSubmit={handleSearch} className="relative w-full">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products... (bolts, screws, nuts)"
+                className="w-full pl-4 pr-12 py-2.5 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 transition-all"
+              />
+              <button 
+                type="submit"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 bg-brand-teal text-white rounded-full flex items-center justify-center hover:bg-brand-teal-dark transition-colors"
+              >
+                <Search size={16} />
+              </button>
+            </form>
+          </div>
+
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-6">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -94,31 +122,95 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Desktop CTAs */}
-          <div className="hidden lg:flex items-center gap-3">
-            <a href={getCallUrl()} className="btn-outline text-sm py-2.5">
-              <Phone size={16} />
-              Call Now
+          {/* Desktop CTAs - Elegant Design */}
+          <div className="hidden lg:flex items-center gap-2 ml-6">
+            {/* WhatsApp Button - Pulsing */}
+            <a 
+              href={getWhatsAppUrl()} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group relative flex items-center gap-2 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white px-4 py-2.5 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+            >
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+              <MessageCircle size={18} className="group-hover:rotate-12 transition-transform" />
+              <span className="font-semibold text-sm">WhatsApp</span>
             </a>
-            <Link to="/request-meeting" className="btn-primary text-sm py-2.5">
-              Get Quote
-            </Link>
+
+            {/* Call Button - Gradient */}
+            <a 
+              href={getCallUrl()} 
+              className="group flex items-center gap-2 bg-gradient-to-r from-brand-orange to-amber-500 text-white px-4 py-2.5 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+            >
+              <Phone size={18} className="group-hover:animate-pulse" />
+              <span className="font-semibold text-sm">Call Now</span>
+            </a>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 text-slate-700 hover:text-brand-teal transition-colors"
-          >
-            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
+          {/* Mobile: Search + Menu */}
+          <div className="flex items-center gap-2 lg:hidden">
+            {/* Mobile Search Toggle */}
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="p-2 text-slate-600 hover:text-brand-teal transition-colors"
+            >
+              <Search size={24} />
+            </button>
+            
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 text-slate-700 hover:text-brand-teal transition-colors"
+            >
+              {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Search Bar */}
+        <div className={`lg:hidden overflow-hidden transition-all duration-300 ${
+          isSearchOpen ? 'max-h-20 pb-4' : 'max-h-0'
+        }`}>
+          <form onSubmit={handleSearch} className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search products..."
+              className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20"
+              autoFocus={isSearchOpen}
+            />
+            <button 
+              type="submit"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-brand-teal text-white rounded-lg flex items-center justify-center"
+            >
+              <Search size={18} />
+            </button>
+          </form>
         </div>
 
         {/* Mobile Navigation */}
         <div className={`lg:hidden overflow-hidden transition-all duration-300 ${
-          isMenuOpen ? 'max-h-96 pb-6' : 'max-h-0'
+          isMenuOpen ? 'max-h-[500px] pb-6' : 'max-h-0'
         }`}>
           <nav className="flex flex-col gap-1 pt-4 border-t border-slate-100">
+            {/* Mobile Search in Menu */}
+            <form onSubmit={handleSearch} className="relative px-4 mb-4">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-teal"
+              />
+              <button 
+                type="submit"
+                className="absolute right-6 top-1/2 -translate-y-1/2 w-9 h-9 bg-brand-teal text-white rounded-lg flex items-center justify-center"
+              >
+                <Search size={18} />
+              </button>
+            </form>
+
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -133,18 +225,36 @@ const Header = () => {
                 {item.name}
               </Link>
             ))}
-            <div className="flex gap-3 mt-4 px-4">
-              <a href={getCallUrl()} className="btn-outline flex-1 justify-center text-sm py-3">
-                <Phone size={16} />
-                Call
-              </a>
-              <Link
-                to="/request-meeting"
-                onClick={() => setIsMenuOpen(false)}
-                className="btn-primary flex-1 justify-center text-sm py-3"
+            
+            {/* Mobile CTAs - Elegant */}
+            <div className="flex flex-col gap-3 mt-4 px-4">
+              {/* WhatsApp - Full width, gradient */}
+              <a 
+                href={getWhatsAppUrl()} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-3 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all"
               >
-                Get Quote
-              </Link>
+                <MessageCircle size={20} />
+                <span className="font-semibold">WhatsApp Us</span>
+              </a>
+              
+              <div className="flex gap-3">
+                <a 
+                  href={getCallUrl()} 
+                  className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-brand-orange to-amber-500 text-white py-3 rounded-xl shadow-md"
+                >
+                  <Phone size={18} />
+                  <span className="font-semibold text-sm">Call</span>
+                </a>
+                <Link
+                  to="/request-meeting"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-brand-teal to-teal-600 text-white py-3 rounded-xl shadow-md"
+                >
+                  <span className="font-semibold text-sm">Get Quote</span>
+                </Link>
+              </div>
             </div>
           </nav>
         </div>

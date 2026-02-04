@@ -54,18 +54,19 @@ const WhyChooseUs = () => {
               construction businesses need. Excellence is our standard.
             </p>
 
-            <div className="grid sm:grid-cols-2 gap-5">
+            {/* 2x2 grid on mobile, 2x3 on tablet/desktop */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
               {features.map((feature, index) => (
                 <div 
                   key={index} 
-                  className="flex gap-4 p-4 rounded-xl bg-white/10 hover:bg-white/15 transition-colors"
+                  className="flex flex-col md:flex-row gap-2 md:gap-4 p-3 md:p-4 rounded-xl bg-white/10 hover:bg-white/15 transition-colors"
                 >
-                  <div className="w-10 h-10 bg-brand-orange rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-brand-orange rounded-lg flex items-center justify-center flex-shrink-0 mx-auto md:mx-0">
                     <feature.icon size={20} className="text-white" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-white mb-1">{feature.title}</h3>
-                    <p className="text-white/70 text-sm">{feature.description}</p>
+                  <div className="text-center md:text-left">
+                    <h3 className="font-semibold text-white text-sm md:text-base mb-0.5 md:mb-1">{feature.title}</h3>
+                    <p className="text-white/70 text-xs md:text-sm hidden md:block">{feature.description}</p>
                   </div>
                 </div>
               ))}

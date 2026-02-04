@@ -333,7 +333,115 @@ function testVisitor() {
 
 ---
 
-## 4. DEPLOYMENT
+## 4. ADDING PRODUCTS (Admin Panel)
+
+### Complete Process to Add a New Product
+
+#### Step 1: Prepare Your Product Image
+
+**Option A: Using Google Drive (Recommended)**
+
+1. Open [Google Drive](https://drive.google.com)
+2. Click **"+ New"** → **"File upload"**
+3. Select your product image (JPG, PNG, or WebP)
+4. Wait for upload to complete
+5. **Right-click** the uploaded image
+6. Click **"Share"**
+7. Click **"Change to anyone with the link"**
+8. Make sure it says **"Anyone with the link" → "Viewer"**
+9. Click **"Copy link"**
+10. You'll get a link like: `https://drive.google.com/file/d/1ABC123xyz.../view?usp=sharing`
+
+**Option B: Using Direct Image URL**
+
+If your image is already hosted online:
+- Use the direct URL (e.g., `https://example.com/images/bolt.jpg`)
+
+---
+
+#### Step 2: Access Admin Panel
+
+1. Open your website
+2. Go to: `yourwebsite.com/apex-portal-9x7k2m`
+3. Enter password: `Test123` (or your custom password)
+4. Click **"Access Dashboard"**
+
+---
+
+#### Step 3: Add the Product
+
+1. Click the **"Products"** tab
+2. Click **"+ Add Product"** button
+3. Fill in the form:
+
+| Field | Example | Required |
+|-------|---------|----------|
+| **Product Name** | Hex Bolt M10x50 SS304 | ✅ Yes |
+| **Category** | bolts | ✅ Yes |
+| **Subcategory** | Hex Bolts | Optional |
+| **Material** | Stainless Steel 304 | Optional |
+| **Size Range** | M6 - M24 | Optional |
+| **Description** | High-strength hex bolt for industrial use | Optional |
+| **Image URL** | (paste Google Drive link) | Optional |
+
+4. Click **"Add Product"**
+
+---
+
+#### Step 4: Verify Product Added
+
+1. Your product appears in the **Custom Products** table
+2. Go to your website's **Products** page
+3. The new product should be visible!
+
+---
+
+### Creating New Categories
+
+When you type a **new category name** that doesn't exist, it's automatically created!
+
+**Example:**
+- You want to add "Washers" category
+- In Category field, type: `washers`
+- Add your product
+- "Washers" category is now available in filters!
+
+---
+
+### Managing Products
+
+**View Products:**
+- Admin Panel → Products tab → See all custom products
+
+**Delete Product:**
+- Click the 🗑️ trash icon next to any product
+
+**Edit Product:**
+- Currently, delete and re-add with correct information
+
+---
+
+### Image Tips
+
+1. **Image Size:** Use images around 400x400 pixels for best results
+2. **Format:** JPG or PNG work best
+3. **Google Drive:** Always set sharing to "Anyone with the link"
+4. **If image doesn't show:** Check that the Google Drive link is shared publicly
+
+---
+
+### Quick Reference
+
+| Task | Where to Go |
+|------|-------------|
+| Add Product | Admin → Products → Add Product |
+| View Products | Website → Products page |
+| Delete Product | Admin → Products → Click trash icon |
+| Add Category | Type new name in Category field |
+
+---
+
+## 5. DEPLOYMENT
 
 ### Option A: Vercel (Recommended - FREE)
 
@@ -357,13 +465,21 @@ function testVisitor() {
 
 ## Quick Checklist
 
+**Initial Setup:**
 - [ ] Configure Google Analytics (analytics.google.com)
 - [ ] Configure Microsoft Clarity (clarity.microsoft.com)
-- [ ] Setup EmailJS OR Google Sheets for enquiries
+- [ ] Setup Google Sheets for enquiries & visitor tracking
 - [ ] Deploy website (Vercel/Netlify)
 - [ ] Submit sitemap to Google Search Console
 - [ ] Create Google My Business listing
 - [ ] Update sitemap.xml with actual domain
+
+**Adding Products:**
+- [ ] Upload product images to Google Drive
+- [ ] Share images with "Anyone with the link"
+- [ ] Access Admin Panel (/apex-portal-9x7k2m)
+- [ ] Add products with images and details
+- [ ] Verify products appear on website
 
 ---
 

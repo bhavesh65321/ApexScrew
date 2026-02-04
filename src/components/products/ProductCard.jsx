@@ -1,19 +1,65 @@
+import { useState } from 'react';
 import { MessageCircle, Package } from 'lucide-react';
 import { getWhatsAppUrl } from '../../data/companyInfo';
 
+/**
+ * Convert Google Drive sharing link to direct image URL
+ * Supports multiple Google Drive URL formats
+ */
+const getImageUrl = (url) => {
+  if (!url) return null;
+  
+  // If it's already a direct URL (not Google Drive), return as is
+  if (!url.includes('drive.google.com')) {
+    return url;
+  }
+  
+  // Extract file ID from various Google Drive URL formats
+  let fileId = null;
+  
+  // Format: https://drive.google.com/file/d/FILE_ID/view
+  const fileMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (fileMatch) {
+    fileId = fileMatch[1];
+  }
+  
+  // Format: https://drive.google.com/open?id=FILE_ID
+  const openMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (!fileId && openMatch) {
+    fileId = openMatch[1];
+  }
+  
+  // Format: https://drive.google.com/uc?id=FILE_ID
+  const ucMatch = url.match(/\/uc\?.*id=([a-zA-Z0-9_-]+)/);
+  if (!fileId && ucMatch) {
+    fileId = ucMatch[1];
+  }
+  
+  if (fileId) {
+    // Use thumbnail endpoint for better compatibility
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+  }
+  
+  return url;
+};
+
 const ProductCard = ({ product }) => {
+  const [imageError, setImageError] = useState(false);
   const enquiryMessage = `Hi, I'm interested in ${product.name} (${product.material}). Please share pricing and availability.`;
+  
+  const imageUrl = getImageUrl(product.image);
 
   return (
     <div className="card-hover overflow-hidden group">
       {/* Image */}
       <div className="relative h-48 bg-slate-100 overflow-hidden">
-        {product.image ? (
+        {imageUrl && !imageError ? (
           <img 
-            src={product.image} 
+            src={imageUrl} 
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
+            onError={() => setImageError(true)}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-50">
