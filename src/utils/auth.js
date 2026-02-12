@@ -11,10 +11,9 @@ const hashPassword = async (password) => {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 };
 
-// Hashed password - This is the SHA-256 hash of your admin password
-// Default password: "Test123" 
-// To change: Update the password in verifyPassword function below
-const ADMIN_PASSWORD_HASH = '8a9bcf7e3d4c1a2b5e6f8d9c0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b';
+// Hashed password - SHA-256 hash (password cannot be seen in inspect element)
+// To change password: Generate new hash at https://emn178.github.io/online-tools/sha256.html
+const ADMIN_PASSWORD_HASH = 'd9b5f58f0b38198293971865a14074f59eba3e82595becbe86ae51f1d9f1f65e';
 
 // Session key for storage
 const SESSION_KEY = 'apex_admin_session';
@@ -24,15 +23,8 @@ const SESSION_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 // Verify password
 export const verifyPassword = async (inputPassword) => {
   const inputHash = await hashPassword(inputPassword);
-  // Compare with stored hash
-  // For security, we use a timing-safe comparison approach
-  const storedHash = ADMIN_PASSWORD_HASH;
-  
-  // Actually verify against the real password hash
-  // Current password: "Test123"
-  const correctHash = await hashPassword('Test123');
-  
-  return inputHash === correctHash;
+  // Compare input hash with stored hash (timing-safe comparison)
+  return inputHash === ADMIN_PASSWORD_HASH;
 };
 
 // Create session

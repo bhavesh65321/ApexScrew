@@ -20,7 +20,7 @@ initAnalytics();
 const Layout = ({ children }) => {
   const location = useLocation();
   // Hide header/footer on admin page
-  const isAdminPage = location.pathname.includes('apex-portal');
+  const isAdminPage = location.pathname.includes('apex-admin');
   
   // Track page views (except admin page)
   useEffect(() => {
@@ -57,7 +57,7 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/request-meeting" element={<MeetingRequestPage />} />
           {/* Hidden Admin Route - Complex URL, not linked anywhere */}
-          <Route path="/apex-portal-9x7k2m" element={<AdminPage />} />
+          <Route path="/apex-admin" element={<AdminPage />} />
         </Routes>
       </Layout>
     </Router>
